@@ -19,12 +19,34 @@ namespace gbacomp
             InitializeComponent();
 
             savDecomp.Filter = opnDecompSource.Filter;
+            opnCompSource.Filter = opnDecompSource.Filter;
+            savComp.Filter = opnDecompSource.Filter;
+        }
+
+        private void lblAbout_Click(object sender, EventArgs e)
+        {
+            string about = "By JeffMan" + Environment.NewLine +
+                "https://github.com/jeffman/gbacomp";
+
+            MessageBox.Show(about, "About");
         }
 
         private void btnDecompSource_Click(object sender, EventArgs e)
         {
             if (opnDecompSource.ShowDialog() == DialogResult.OK)
                 txtDecompSource.Text = opnDecompSource.FileName;
+        }
+
+        private void btnCompSource_Click(object sender, EventArgs e)
+        {
+            if (opnCompSource.ShowDialog() == DialogResult.OK)
+                txtCompSource.Text = opnCompSource.FileName;
+        }
+
+        private void btnCompDest_Click(object sender, EventArgs e)
+        {
+            if (savComp.ShowDialog() == DialogResult.OK)
+                txtCompDest.Text = savComp.FileName;
         }
 
         private void btnDecomp_Click(object sender, EventArgs e)
@@ -55,8 +77,8 @@ namespace gbacomp
             }
 
             // Grab the source address
-            int address;
-            if (!Extensions.TryParseHex(txtDecompAddr.Text, out address))
+            int srcAddr;
+            if (!Extensions.TryParseHex(txtDecompAddr.Text, out srcAddr))
             {
                 // Not a valid hex number
                 lblStatus.Text = "Not a valid hex number";
@@ -66,7 +88,7 @@ namespace gbacomp
             }
 
             // See if it's in range
-            if ((address < 0) || (address >= src.Length))
+            if ((srcAddr < 0) || (srcAddr >= src.Length))
             {
                 // Out of range
                 lblStatus.Text = "Address out of range";
@@ -81,7 +103,7 @@ namespace gbacomp
 
             try
             {
-                result = LZ77.Decompress(src, address, out decomp);
+                result = LZ77.Decompress(src, srcAddr, out decomp);
             }
             catch
             {
@@ -125,11 +147,112 @@ namespace gbacomp
             }
         }
 
-        private void lblAbout_Click(object sender, EventArgs e)
+        private void btnCompress_Click(object sender, EventArgs e)
         {
-            string about = "By JeffMan" + Environment.NewLine +
-                "jeffman@starmen.net" + Environment.NewLine +
-                "";
+            // Check if the source exists
+            if (!File.Exists(txtCompSource.Text))
+            {
+                lblStatus.Text = "File not found";
+                txtCompSource.Focus();
+                txtCompSource.SelectAll();
+                return;
+            }
+
+            // Try loading the files
+            byte[] src = null;
+
+            try
+            {
+                src = File.ReadAllBytes(txtCompSource.Text);
+            }
+            catch
+            {
+                // Error loading file
+                lblStatus.Text = "Error loading file";
+                txtCompSource.Focus();
+                txtCompSource.SelectAll();
+                return;
+            }
+
+            byte[] dest = null;
+
+            if (File.Exists(txtCompDest.Text))
+            {
+                try
+                {
+                    dest = File.ReadAllBytes(txtCompDest.Text);
+                }
+                catch
+                {
+                    // Error loading file
+                    lblStatus.Text = "Error loading file";
+                    txtCompDest.Focus();
+                    txtCompDest.SelectAll();
+                    return;
+                }
+            }
+
+            // Grab the destination address
+            int destAddr = -1;
+            if (dest != null)
+            {
+                if (!Extensions.TryParseHex(txtCompDestAddr.Text, out destAddr))
+                {
+                    // Not a valid hex number
+                    lblStatus.Text = "Not a valid hex number";
+                    txtCompDestAddr.Focus();
+                    txtCompDestAddr.Select();
+                    return;
+                }
+
+                // See if it's in range
+                if ((destAddr < 0) || (destAddr >= dest.Length))
+                {
+                    // Out of range
+                    lblStatus.Text = "Address out of range";
+                    txtCompDestAddr.Focus();
+                    txtCompDestAddr.Select();
+                    return;
+                }
+            }
+
+            // Comp
+            lblStatus.Text = "Compressing...";
+            byte[] comp = LZ77.Compress(src);
+
+            if (dest != null)
+            {
+                // Insert it into the destination file
+                try
+                {
+                    Array.Copy(comp, 0, dest, destAddr, comp.Length);
+                }
+                catch
+                {
+                    lblStatus.Text = "Error copying data to destination";
+                    return;
+                }
+            }
+            else
+            {
+                // Ask for destination file
+                btnCompDest_Click(null, null);
+                dest = comp;
+            }
+
+            // Write the destination file
+            try
+            {
+                File.WriteAllBytes(txtCompDest.Text, dest);
+            }
+            catch
+            {
+                lblStatus.Text = "Error writing destination file";
+                return;
+            }
+
+            // Finished
+            lblStatus.Text = "Compressed " + src.Length + " bytes to " + comp.Length + " bytes";
         }
     }
 }
