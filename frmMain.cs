@@ -253,6 +253,7 @@ namespace gbacomp
 
             // Finished
             lblStatus.Text = "Compressed " + src.Length + " bytes to " + comp.Length + " bytes";
+
         }
     }
 }
