@@ -21,6 +21,9 @@ namespace gbacomp
             savDecomp.Filter = opnDecompSource.Filter;
             opnCompSource.Filter = opnDecompSource.Filter;
             savComp.Filter = opnDecompSource.Filter;
+            opnCompDest.Filter = opnDecompSource.Filter;
+
+            rdoNewFile_CheckedChanged(null, null);
         }
 
         private void lblAbout_Click(object sender, EventArgs e)
@@ -45,8 +48,16 @@ namespace gbacomp
 
         private void btnCompDest_Click(object sender, EventArgs e)
         {
-            if (savComp.ShowDialog() == DialogResult.OK)
-                txtCompDest.Text = savComp.FileName;
+            if (rdoNewFile.Checked)
+            {
+                if (savComp.ShowDialog() == DialogResult.OK)
+                    txtCompDest.Text = savComp.FileName;
+            }
+            else if (rdoExistingFile.Checked)
+            {
+                if (opnCompDest.ShowDialog() == DialogResult.OK)
+                    txtCompDest.Text = opnCompDest.FileName;
+            }
         }
 
         private void btnDecomp_Click(object sender, EventArgs e)
@@ -78,7 +89,9 @@ namespace gbacomp
 
             // Grab the source address
             int srcAddr;
-            if (!Extensions.TryParseHex(txtDecompAddr.Text, out srcAddr))
+            if (txtDecompAddr.Text.Equals(string.Empty))
+                srcAddr = 0;
+            else if (!Extensions.TryParseHex(txtDecompAddr.Text, out srcAddr))
             {
                 // Not a valid hex number
                 lblStatus.Text = "Not a valid hex number";
@@ -149,12 +162,23 @@ namespace gbacomp
 
         private void btnCompress_Click(object sender, EventArgs e)
         {
+            bool newfile = rdoNewFile.Checked;
+
             // Check if the source exists
             if (!File.Exists(txtCompSource.Text))
             {
                 lblStatus.Text = "File not found";
                 txtCompSource.Focus();
                 txtCompSource.SelectAll();
+                return;
+            }
+
+            // Check if the existing dest file exists
+            if (!newfile && !File.Exists(txtCompDest.Text))
+            {
+                lblStatus.Text = "File not found";
+                txtCompDest.Focus();
+                txtCompDest.SelectAll();
                 return;
             }
 
@@ -176,7 +200,7 @@ namespace gbacomp
 
             byte[] dest = null;
 
-            if (File.Exists(txtCompDest.Text))
+            if (!newfile)
             {
                 try
                 {
@@ -196,7 +220,10 @@ namespace gbacomp
             int destAddr = -1;
             if (dest != null)
             {
-                if (!Extensions.TryParseHex(txtCompDestAddr.Text, out destAddr))
+                if (txtCompDestAddr.Text.Equals(""))
+                    destAddr = 0;
+
+                else if (!Extensions.TryParseHex(txtCompDestAddr.Text, out destAddr))
                 {
                     // Not a valid hex number
                     lblStatus.Text = "Not a valid hex number";
@@ -220,7 +247,7 @@ namespace gbacomp
             lblStatus.Text = "Compressing...";
             byte[] comp = LZ77.Compress(src);
 
-            if (dest != null)
+            if (!newfile)
             {
                 // Insert it into the destination file
                 try
@@ -236,7 +263,6 @@ namespace gbacomp
             else
             {
                 // Ask for destination file
-                btnCompDest_Click(null, null);
                 dest = comp;
             }
 
@@ -253,6 +279,11 @@ namespace gbacomp
 
             // Finished
             lblStatus.Text = "Compressed " + src.Length + " bytes to " + comp.Length + " bytes";
+        }
+
+        private void rdoNewFile_CheckedChanged(object sender, EventArgs e)
+        {
+            txtCompDestAddr.Enabled = !rdoNewFile.Checked;
         }
     }
 }

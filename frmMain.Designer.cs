@@ -53,6 +53,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.opnCompSource = new System.Windows.Forms.OpenFileDialog();
             this.savComp = new System.Windows.Forms.SaveFileDialog();
+            this.rdoNewFile = new System.Windows.Forms.RadioButton();
+            this.rdoExistingFile = new System.Windows.Forms.RadioButton();
+            this.opnCompDest = new System.Windows.Forms.OpenFileDialog();
             this.grpDecomp.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.grpComp.SuspendLayout();
@@ -157,7 +160,7 @@
             // lblSpace
             // 
             this.lblSpace.Name = "lblSpace";
-            this.lblSpace.Size = new System.Drawing.Size(386, 17);
+            this.lblSpace.Size = new System.Drawing.Size(519, 17);
             this.lblSpace.Spring = true;
             // 
             // lblAbout
@@ -171,6 +174,8 @@
             // 
             this.grpComp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpComp.Controls.Add(this.rdoExistingFile);
+            this.grpComp.Controls.Add(this.rdoNewFile);
             this.grpComp.Controls.Add(this.txtCompDestAddr);
             this.grpComp.Controls.Add(this.label6);
             this.grpComp.Controls.Add(this.btnCompDest);
@@ -277,6 +282,33 @@
             // 
             this.opnCompSource.Filter = "All files|*.*|GBA files|*.gba|Data files|*.bin;*.dat";
             // 
+            // rdoNewFile
+            // 
+            this.rdoNewFile.AutoSize = true;
+            this.rdoNewFile.Checked = true;
+            this.rdoNewFile.Location = new System.Drawing.Point(213, 72);
+            this.rdoNewFile.Name = "rdoNewFile";
+            this.rdoNewFile.Size = new System.Drawing.Size(63, 17);
+            this.rdoNewFile.TabIndex = 11;
+            this.rdoNewFile.TabStop = true;
+            this.rdoNewFile.Text = "New file";
+            this.rdoNewFile.UseVisualStyleBackColor = true;
+            this.rdoNewFile.CheckedChanged += new System.EventHandler(this.rdoNewFile_CheckedChanged);
+            // 
+            // rdoExistingFile
+            // 
+            this.rdoExistingFile.AutoSize = true;
+            this.rdoExistingFile.Location = new System.Drawing.Point(282, 72);
+            this.rdoExistingFile.Name = "rdoExistingFile";
+            this.rdoExistingFile.Size = new System.Drawing.Size(77, 17);
+            this.rdoExistingFile.TabIndex = 12;
+            this.rdoExistingFile.Text = "Existing file";
+            this.rdoExistingFile.UseVisualStyleBackColor = true;
+            // 
+            // opnCompDest
+            // 
+            this.opnCompDest.Filter = "All files|*.*|GBA files|*.gba|Data files|*.bin;*.dat";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -328,6 +360,9 @@
         private System.Windows.Forms.ToolStripStatusLabel lblAbout;
         private System.Windows.Forms.OpenFileDialog opnCompSource;
         private System.Windows.Forms.SaveFileDialog savComp;
+        private System.Windows.Forms.RadioButton rdoExistingFile;
+        private System.Windows.Forms.RadioButton rdoNewFile;
+        private System.Windows.Forms.OpenFileDialog opnCompDest;
     }
 }
 
